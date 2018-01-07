@@ -30,16 +30,20 @@ io.on('connection', (socket) =>{
     users.addUser(socket.id, params.name, params.room);
 
     io.to(params.room).emit('updateUserList', users.getUserList(params.room));
-    socket.emit('newMessage', generateMessage('Admin', 'Welcome to the chat app'));
-    socket.broadcast.emit('newMessage', generateMessage('Admin', `${params.name} has joined.`));
+    socket.emit('newMessage', generateMessage('Admin', 'Welcome to Tysflo chat. '));
+    socket.broadcast.emit('newMessage', generateMessage('Admin', `${params.name} has joined the chat.`));
         callback();
       });
 
-    socket.on('createMessage', (message, callback) => {
-        console.log('createMessage', message);
-        io.emit('newMessage', generateMessage(message.from, message.text));
-        callback('This is from the server');
-    });
+      socket.on('createMessage', (message, callback) => {
+        var user = users.getUser(socket.id);
+    
+        if (user && isRealString(message.text)) {
+          io.to(user.room).emit('newMessage', generateMessage(user.name, message.text));
+        }
+    
+        callback();
+      });
 
     socket.on('disconnect', () => {
         
