@@ -25,16 +25,20 @@ io.on('connection', (socket) =>{
           return callback('Name and room name are required.');
         }
 
+
+        //User Joins the chat.
         socket.join(params.room);
     users.removeUser(socket.id);
     users.addUser(socket.id, params.name, params.room);
 
     io.to(params.room).emit('updateUserList', users.getUserList(params.room));
     socket.emit('newMessage', generateMessage('Admin', 'Welcome to Tysflo chat. '));
-    socket.broadcast.emit('newMessage', generateMessage('Admin', `${params.name} has joined the chat.`));
+    socket.emit('newMessage', generateMessage('Admin', `${params.name} has joined the chat.`));
         callback();
       });
 
+
+      //when creating message use user info
       socket.on('createMessage', (message, callback) => {
         var user = users.getUser(socket.id);
     
@@ -45,6 +49,8 @@ io.on('connection', (socket) =>{
         callback();
       });
 
+
+      //when user leaves this removes them from the chat
     socket.on('disconnect', () => {
         
     var user = users.removeUser(socket.id);
